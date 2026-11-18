@@ -124,3 +124,18 @@
   <script src="app.js"></script>
 </body>
 </html>
+<!-- Supabase connection -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const MUTIFY_SUPABASE_URL =
+    "https://hyidfjxtzdkkdbpzxqdu.supabase.co";
+
+  const MUTIFY_SUPABASE_KEY =
+    "sb_publishable_RXdNc8X8RxTKa2IsTq3nFg_2eg6I6rk";
+
+  window.mutifySupabase = window.supabase.createClient(
+    MUTIFY_SUPABASE_URL,
+    MUTIFY_SUPABASE_KEY
+  );
+</script>

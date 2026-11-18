@@ -1,45 +1,87 @@
 
 (() => {
-  const supabase = window.mutifySupabase;
+  const db = window.mutifySupabase;
 
-  if (!supabase) {
-    console.error("Mutify: Supabase connection not found.");
+  if (!db) {
+    console.error("Mutify Supabase connection is missing.");
     return;
   }
 
-  const style = document.createElement("style");
-  style.textContent = `
+  const css = document.createElement("style");
+  css.textContent = `
     #mutify-account {
-      background:#16834a;color:white;border:0;border-radius:25px;
-      padding:11px 20px;font-weight:bold;cursor:pointer;
+      background:#16834a;
+      color:white;
+      border:0;
+      border-radius:25px;
+      padding:11px 17px;
+      font-weight:bold;
+      cursor:pointer;
+      white-space:nowrap;
+      font-size:14px;
+      margin:0 5px;
     }
     #mutify-auth-overlay {
-      position:fixed;inset:0;background:#0009;z-index:99999;
-      display:none;align-items:center;justify-content:center;padding:20px;
+      position:fixed;
+      inset:0;
+      background:#0009;
+      z-index:999999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
     }
     #mutify-auth-box {
-      background:white;color:#17251c;width:100%;max-width:380px;
-      padding:25px;border-radius:18px;font-family:Arial,sans-serif;
+      background:white;
+      color:#17251c;
+      width:100%;
+      max-width:390px;
+      padding:25px;
+      border-radius:20px;
       box-sizing:border-box;
+      font-family:Arial,sans-serif;
     }
     #mutify-auth-box input {
-      width:100%;padding:13px;margin:8px 0;
-      border:1px solid #ddd;border-radius:9px;box-sizing:border-box;
+      width:100%;
+      box-sizing:border-box;
+      padding:14px;
+      margin:8px 0;
+      border:1px solid #ddd;
+      border-radius:10px;
     }
     #mutify-auth-box button {
-      padding:12px;border:0;border-radius:9px;cursor:pointer;
-      margin-top:10px;font-weight:bold;
+      padding:13px;
+      border:0;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
     }
-    #mutify-auth-submit {background:#16834a;color:white;width:100%;}
-    #mutify-auth-switch {background:#e9f5ed;color:#16834a;width:100%;}
-    #mutify-auth-close {float:right;background:#eee;}
-    #mutify-auth-message {font-size:13px;line-height:1.5;margin-top:12px;}
+    #mutify-auth-submit {
+      width:100%;
+      background:#16834a;
+      color:white;
+      margin-top:12px;
+    }
+    #mutify-auth-switch {
+      width:100%;
+      background:#e9f5ed;
+      color:#16834a;
+      margin-top:10px;
+    }
+    #mutify-auth-close {
+      float:right;
+      background:#eee;
+    }
+    #mutify-auth-message {
+      font-size:13px;
+      line-height:1.5;
+    }
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(css);
 
-  const button = document.createElement("button");
-  button.id = "mutify-account";
-  button.textContent = "My Account";
+  const account = document.createElement("button");
+  account.id = "mutify-account";
+  account.textContent = "My Account";
 
   const overlay = document.createElement("div");
   overlay.id = "mutify-auth-overlay";
@@ -48,91 +90,130 @@
       <button id="mutify-auth-close">✕</button>
       <h2 id="mutify-auth-title">Welcome to Mutify</h2>
       <p id="mutify-auth-description">Sign in to your account.</p>
+
       <form id="mutify-auth-form">
         <input id="mutify-auth-email" type="email"
           placeholder="Email address" required>
         <input id="mutify-auth-password" type="password"
-          placeholder="Password (at least 6 characters)"
+          placeholder="Password (minimum 6 characters)"
           minlength="6" required>
         <button id="mutify-auth-submit" type="submit">Sign In</button>
       </form>
+
       <button id="mutify-auth-switch">Create an account</button>
-      <p id="mutify-auth-message" aria-live="polite"></p>
+      <p id="mutify-auth-message"></p>
     </div>
   `;
 
-  document.querySelector(".header-actions").append(button);
-document.body.append(overlay);
+  document.body.appendChild(overlay);
 
-  let signupMode = false;
+  // Put the account button in the website's top navigation.
+  function placeAccountButton() {
+    const selectors = [
+      ".header-actions",
+      ".nav-actions",
+      ".navbar-actions",
+      ".header-right",
+      ".nav-right",
+      ".nav-links",
+      "header nav",
+      "header .container",
+      "header",
+      "nav"
+    ];
+
+    let target = null;
+
+    for (const selector of selectors) {
+      const found = document.querySelector(selector);
+      if (found && found !== account && !found.closest("#mutify-auth-box")) {
+        target = found;
+        break;
+      }
+    }
+
+    if (target) {
+      target.appendChild(account);
+      account.style.display = "inline-block";
+    } else {
+      account.style.position = "fixed";
+      account.style.top = "12px";
+      account.style.right = "12px";
+      account.style.zIndex = "99998";
+      document.body.appendChild(account);
+    }
+  }
+
+  placeAccountButton();
+
+  let signup = false;
 
   const title = document.getElementById("mutify-auth-title");
   const description = document.getElementById("mutify-auth-description");
+  const form = document.getElementById("mutify-auth-form");
   const submit = document.getElementById("mutify-auth-submit");
   const switchButton = document.getElementById("mutify-auth-switch");
   const message = document.getElementById("mutify-auth-message");
-  const form = document.getElementById("mutify-auth-form");
 
-  function showMessage(text, error = false) {
+  function say(text, error = false) {
     message.textContent = text;
     message.style.color = error ? "#c62828" : "#16834a";
   }
 
-  function updateMode() {
-    title.textContent = signupMode ? "Create your Mutify account" : "Welcome to Mutify";
-    description.textContent = signupMode
-      ? "Join Mutify to shop and discover products."
-      : "Sign in to continue.";
-    submit.textContent = signupMode ? "Create Account" : "Sign In";
-    switchButton.textContent = signupMode
-      ? "Already have an account? Sign in"
+  function setMode() {
+    title.textContent = signup ? "Create your Mutify account" : "Welcome to Mutify";
+    description.textContent = signup
+      ? "Create an account to shop on Mutify."
+      : "Sign in to continue shopping.";
+    submit.textContent = signup ? "Create Account" : "Sign In";
+    switchButton.textContent = signup
+      ? "Already registered? Sign In"
       : "Create an account";
-    showMessage("");
+    say("");
   }
 
-  button.addEventListener("click", async () => {
-    const { data } = await supabase.auth.getUser();
+  account.addEventListener("click", async () => {
+    const { data, error } = await db.auth.getUser();
 
-    if (data.user) {
-      showMessage("Signed in as " + data.user.email);
-      signupMode = false;
-      updateMode();
-      title.textContent = "Your Mutify account";
-      description.textContent = data.user.email;
-      submit.style.display = "none";
+    if (error) {
+      say(error.message, true);
+    } else if (data.user) {
+      signup = false;
       form.style.display = "none";
+      submit.style.display = "none";
+      title.textContent = "Your Mutify Account";
+      description.textContent = data.user.email;
       switchButton.textContent = "Sign Out";
-      switchButton.onclick = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) return showMessage(error.message, true);
-        location.reload();
-      };
+      say("You are signed in.");
     } else {
-      signupMode = false;
-      updateMode();
       form.style.display = "block";
       submit.style.display = "block";
-      switchButton.onclick = null;
+      setMode();
     }
 
     overlay.style.display = "flex";
   });
 
-  document.getElementById("mutify-auth-close").addEventListener("click", () => {
+  document.getElementById("mutify-auth-close").onclick = () => {
     overlay.style.display = "none";
-  });
+  };
 
   overlay.addEventListener("click", event => {
     if (event.target === overlay) overlay.style.display = "none";
   });
 
-  switchButton.addEventListener("click", () => {
-    if (switchButton.textContent === "Sign Out") return;
-    signupMode = !signupMode;
+  switchButton.addEventListener("click", async () => {
+    if (switchButton.textContent === "Sign Out") {
+      const { error } = await db.auth.signOut();
+      if (error) return say(error.message, true);
+      location.reload();
+      return;
+    }
+
+    signup = !signup;
     form.style.display = "block";
     submit.style.display = "block";
-    switchButton.onclick = null;
-    updateMode();
+    setMode();
   });
 
   form.addEventListener("submit", async event => {
@@ -143,31 +224,38 @@ document.body.append(overlay);
 
     submit.disabled = true;
     submit.textContent = "Please wait...";
-    showMessage("");
 
-    const result = signupMode
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password });
+    let result;
+
+    if (signup) {
+      result = await db.auth.signUp({ email, password });
+    } else {
+      result = await db.auth.signInWithPassword({ email, password });
+    }
 
     submit.disabled = false;
-    submit.textContent = signupMode ? "Create Account" : "Sign In";
+    submit.textContent = signup ? "Create Account" : "Sign In";
 
     if (result.error) {
-      showMessage(result.error.message, true);
+      say(result.error.message, true);
       return;
     }
 
-    if (signupMode && !result.data.session) {
-      showMessage("Account created! Check your email to confirm your account.");
+    if (signup && !result.data.session) {
+      say("Account created! Please check your email to confirm your account.");
       return;
     }
 
-    showMessage("Successfully signed in!");
+    say("Successfully signed in!");
     setTimeout(() => location.reload(), 1000);
   });
 
-  supabase.auth.onAuthStateChange((_event, session) => {
-    button.textContent = session ? "My Account ✓" : "My Account";
+  db.auth.onAuthStateChange((_event, session) => {
+    account.textContent = session ? "My Account ✓" : "My Account";
+  });
+
+  db.auth.getUser().then(({ data }) => {
+    account.textContent = data.user ? "My Account ✓" : "My Account";
   });
 })();
-          
+  

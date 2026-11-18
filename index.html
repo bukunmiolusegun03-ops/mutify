@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Discover everyday essentials at Mutify. Shop electronics, fashion, home and more.">
+  <title>Mutify — Shop smarter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="announcement">WELCOME TO MUTIFY <span>·</span> Discover more. Spend smarter.</div>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Mutify home"><span class="brand-mark">m</span> mutify<span class="brand-dot">.</span></a>
+    <form class="search" id="searchForm">
+      <span aria-hidden="true">⌕</span>
+      <input id="searchInput" type="search" placeholder="Search products, brands and more…" aria-label="Search products">
+      <button type="submit">Search</button>
+    </form>
+    <div class="header-actions">
+      <label class="currency-wrap" aria-label="Choose currency">
+        <span>Currency</span>
+        <select id="currencySelect">
+          <option value="NGN">NGN ₦</option>
+          <option value="USD">USD $</option>
+          <option value="GBP">GBP £</option>
+          <option value="EUR">EUR €</option>
+          <option value="GHS">GHS GH₵</option>
+        </select>
+      </label>
+      <button class="icon-btn" id="wishlistTop" aria-label="Show wishlist">♡ <span class="action-label">Saved</span><b id="wishCount">0</b></button>
+      <button class="icon-btn cart-trigger" id="cartOpen" aria-label="Open cart">▣ <span class="action-label">Cart</span><b id="cartCount">0</b></button>
+    </div>
+  </header>
+
+  <nav class="main-nav" aria-label="Main navigation">
+    <a class="active" href="#home">Home</a>
+    <a href="#shop">Shop all</a>
+    <a href="#categories">Categories</a>
+    <a href="#deals">Special offers</a>
+    <a href="#about">About Mutify</a>
+  </nav>
+
+  <main id="home">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow"><i></i> THE EVERYDAY EDIT</span>
+        <h1>Good finds.<br><em>Better living.</em></h1>
+        <p>Discover useful things, fresh styles and everyday essentials — all in one place.</p>
+        <a class="primary-btn" href="#shop">Explore the store <span>↗</span></a>
+        <div class="hero-note"><span>✳</span> A little something for every day.</div>
+      </div>
+      <div class="hero-art" aria-label="Curated shopping collection">
+        <div class="art-circle"></div>
+        <div class="floating-card card-one"><span>THE DAILY<br>ESSENTIALS</span><b>01</b></div>
+        <div class="floating-card card-two"><span>FRESH<br>FINDS</span><b>02</b></div>
+        <div class="hero-product">✦</div>
+        <div class="art-caption">CURATED FOR YOU <span>— MUTIFY SELECTS</span></div>
+      </div>
+    </section>
+
+    <section class="trust-row">
+      <div><span>◇</span><section><b>Curated products</b><small>Useful finds, thoughtfully picked</small></section></div>
+      <div><span>⌁</span><section><b>Easy shopping</b><small>A simple, smooth experience</small></section></div>
+      <div><span>♡</span><section><b>Your saved favourites</b><small>Keep the things you love close</small></section></div>
+    </section>
+
+    <section class="category-section" id="categories">
+      <div class="section-heading">
+        <div><span class="eyebrow">FIND YOUR NEXT FAVOURITE</span><h2>Shop by category</h2></div>
+        <a href="#shop" class="text-link">View everything ↗</a>
+      </div>
+      <div class="category-grid" id="categoryGrid"></div>
+    </section>
+
+    <section class="products-section" id="shop">
+      <div class="section-heading products-heading">
+        <div><span class="eyebrow">THE MUTIFY COLLECTION</span><h2 id="productHeading">Popular right now</h2></div>
+        <div class="filter-tools">
+          <select id="sortSelect" aria-label="Sort products">
+            <option value="featured">Featured</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+            <option value="name">Name: A to Z</option>
+          </select>
+        </div>
+      </div>
+      <div class="active-filter" id="activeFilter"></div>
+      <div class="product-grid" id="productGrid"></div>
+      <div class="empty-state hidden" id="emptyState"><span>⌕</span><h3>No products found</h3><p>Try another search or choose a different category.</p><button class="outline-btn" id="resetFilters">Clear filters</button></div>
+    </section>
+
+    <section class="promo" id="deals">
+      <div><span class="eyebrow">A FRESH START</span><h2>Make room for<br><em>something good.</em></h2><p>Explore the collection and find something that fits your everyday.</p><a class="light-btn" href="#shop">Shop the collection ↗</a></div>
+      <div class="promo-stamp">M<br><small>UTIFY<br>FINDS</small></div>
+    </section>
+
+    <section class="newsletter" id="about">
+      <div><span class="eyebrow">A NOTE FROM MUTIFY</span><h2>Good things, in your inbox.</h2><p>Get product highlights and store updates. No noise, just the good stuff.</p></div>
+      <form id="newsletterForm"><input type="email" id="newsletterEmail" placeholder="Your email address" required><button type="submit">Sign me up ↗</button></form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="brand footer-brand" href="#"><span class="brand-mark">m</span> mutify<span class="brand-dot">.</span></a>
+    <p>Discover more. Spend smarter.</p>
+    <div class="footer-links"><a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#about">Contact</a><a href="#home">Back to top ↑</a></div>
+    <small>© <span id="year"></span> Mutify. Demo storefront — products and checkout are sample features.</small>
+  </footer>
+
+  <div class="overlay hidden" id="overlay"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
+    <div class="drawer-head"><div><span class="eyebrow">YOUR SELECTION</span><h2>Your bag <span id="drawerCount">(0)</span></h2></div><button class="close-btn" id="cartClose" aria-label="Close cart">×</button></div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-bottom"><div class="subtotal"><span>Subtotal</span><b id="cartSubtotal">₦0</b></div><p>Shipping and taxes are calculated at checkout.</p><button class="checkout-btn" id="checkoutBtn">Continue to checkout ↗</button><button class="continue-btn" id="continueShopping">Continue shopping</button></div>
+  </aside>
+
+  <div class="modal hidden" id="productModal" role="dialog" aria-modal="true" aria-label="Product details">
+    <button class="close-btn modal-close" id="modalClose" aria-label="Close">×</button>
+    <div id="modalContent"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>

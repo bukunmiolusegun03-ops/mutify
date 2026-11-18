@@ -61,7 +61,21 @@
     </div>
   `;
 
-  document.querySelector(".header-actions").appendChild(button);
+  const headerTarget =
+  document.querySelector(".header-actions") ||
+  document.querySelector("header nav") ||
+  document.querySelector("header");
+
+if (headerTarget) {
+  headerTarget.appendChild(button);
+} else {
+  button.style.position = "fixed";
+  button.style.top = "12px";
+  button.style.right = "12px";
+  button.style.zIndex = "99998";
+  document.body.appendChild(button);
+}
+
 document.body.appendChild(overlay);
 
   let signupMode = false;

@@ -61,7 +61,8 @@
     </div>
   `;
 
-  document.body.append(button, overlay);
+  document.querySelector(".header-actions").append(button);
+document.body.append(overlay);
 
   let signupMode = false;
 

@@ -115,7 +115,13 @@
 
   if (headerTarget) {
     headerTarget.appendChild(button);
-    headerTarget.appendChild(adminLink);
+
+adminLink.style.display = "inline-block";
+adminLink.style.visibility = "visible";
+adminLink.style.position = "relative";
+adminLink.style.zIndex = "999999";
+
+headerTarget.appendChild(adminLink);
   } else {
     button.style.position = "fixed";
     button.style.top = "12px";

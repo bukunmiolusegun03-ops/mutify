@@ -143,6 +143,17 @@
     MUTIFY_SUPABASE_URL,
     MUTIFY_SUPABASE_KEY
   );
+  fetch(MUTIFY_SUPABASE_URL + "/auth/v1/settings", {
+  headers: {
+    apikey: MUTIFY_SUPABASE_KEY
+  }
+})
+.then(response => {
+  alert("Connection test: HTTP " + response.status);
+})
+.catch(error => {
+  alert("Connection error: " + error.message);
+});
 </script>
 
 <!-- Mutify website scripts -->

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,61 +8,293 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     body {
+      margin: 0;
       background: #f4f7f5;
       font-family: Arial, sans-serif;
+      color: #17251c;
+    }
+    .container {
+      max-width: 1100px;
+      margin: auto;
       padding: 20px;
     }
-    .admin-container {
-      max-width: 1000px;
-      margin: 30px auto;
-    }
-    .admin-header {
+    header {
       background: #16834a;
       color: white;
       padding: 25px;
-      border-radius: 15px;
+      border-radius: 16px;
     }
-    .admin-card {
+    .panel {
       background: white;
       padding: 20px;
       margin-top: 20px;
-      border-radius: 12px;
-      box-shadow: 0 3px 12px #00000010;
+      border-radius: 14px;
+      box-shadow: 0 3px 12px #0001;
+      overflow-x: auto;
     }
     button {
       background: #16834a;
       color: white;
       border: 0;
-      padding: 10px 16px;
+      padding: 10px 14px;
+      margin: 4px;
       border-radius: 8px;
       cursor: pointer;
     }
-    .status {
-      color: #16834a;
-      font-weight: bold;
+    button.reject { background: #bd3030; }
+    button.suspend { background: #805b16; }
+    button:disabled { opacity: .5; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
     }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th { background: #f0f6f2; }
+    #message { margin-top: 15px; font-weight: bold; }
+    .muted { color: #66736a; }
+    #dashboard { display: none; }
   </style>
 </head>
 <body>
-
-<div class="admin-container">
-  <div class="admin-header">
+<div class="container">
+  <header>
     <h1>Mutify Admin</h1>
-    <p>Marketplace management dashboard</p>
+    <p>Marketplace management</p>
+    <button id="logout">Log out</button>
+  </header>
+
+  <div class="panel" id="loginPanel">
+    <h2>Administrator login</h2>
+    <input id="email" type="email" placeholder="Email address">
+    <input id="password" type="password" placeholder="Password">
+    <button id="login">Sign in</button>
+    <p id="loginMessage"></p>
   </div>
 
-  <div class="admin-card">
-    <h2>Seller Applications</h2>
-    <p>Manage shops waiting for approval.</p>
-    <div id="applications">Loading applications...</div>
+  <div id="dashboard">
+    <div class="panel">
+      <h2>Seller applications and shops</h2>
+      <button id="refresh">Refresh dashboard</button>
+      <div id="shops">Loading shops...</div>
+    </div>
+
+    <div class="panel">
+      <h2>Marketplace products</h2>
+      <div id="products">Loading products...</div>
+    </div>
   </div>
 
-  <div class="admin-card">
-    <h2>Marketplace Products</h2>
-    <p>View products listed by sellers.</p>
-    <div id="products">Loading products...</div>
-  </div>
+  <p id="message"></p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://hyidfjxtzdkkdbpzxqdu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_RXdNc8X8RxTKa2IsTq3nFg_2eg6I6rk";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const message = document.getElementById("message");
+const loginMessage = document.getElementById("loginMessage");
+
+document.getElementById("login").onclick = async () => {
+  loginMessage.textContent = "Signing in...";
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  const { error } = await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    loginMessage.textContent = error.message;
+    return;
+  }
+
+  await checkAdmin();
+};
+
+document.getElementById("logout").onclick = async () => {
+  await db.auth.signOut();
+  location.reload();
+};
+
+document.getElementById("refresh").onclick = loadDashboard;
+
+async function checkAdmin() {
+  message.textContent = "Checking administrator access...";
+
+  const { data: { user }, error } = await db.auth.getUser();
+
+  if (error || !user) {
+    document.getElementById("loginPanel").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+    message.textContent = "Please sign in.";
+    return;
+  }
+
+  const { data: profile, error: profileError } = await db
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile || profile.role !== "admin") {
+    document.getElementById("dashboard").style.display = "none";
+    message.textContent = "Access denied. Administrator permission required.";
+    return;
+  }
+
+  document.getElementById("loginPanel").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+  message.textContent = "Administrator access verified.";
+  await loadDashboard();
+}
+
+async function loadDashboard() {
+  document.getElementById("shops").textContent = "Loading shops...";
+  document.getElementById("products").textContent = "Loading products...";
+
+  const { data: shops, error: shopError } = await db
+    .from("shops")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (shopError) {
+    document.getElementById("shops").textContent = shopError.message;
+  } else {
+    showShops(shops || []);
+  }
+
+  const { data: products, error: productError } = await db
+    .from("products")
+    .select("id, name, price, currency, category, is_active, shop_id")
+    .order("created_at", { ascending: false });
+
+  if (productError) {
+    document.getElementById("products").textContent = productError.message;
+  } else {
+    showProducts(products || []);
+  }
+}
+
+function showShops(shops) {
+  const target = document.getElementById("shops");
+
+  if (!shops.length) {
+    target.textContent = "No shops found.";
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.innerHTML = `
+    <tr>
+      <th>Shop</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  `;
+
+  shops.forEach(shop => {
+    const row = document.createElement("tr");
+
+    const name = document.createElement("td");
+    name.textContent = shop.shop_name;
+
+    const status = document.createElement("td");
+    status.textContent = shop.status;
+
+    const actions = document.createElement("td");
+
+    ["approved", "rejected", "suspended"].forEach(value => {
+      const button = document.createElement("button");
+      button.textContent =
+        value.charAt(0).toUpperCase() + value.slice(1);
+
+      if (value === "rejected") button.className = "reject";
+      if (value === "suspended") button.className = "suspend";
+
+      button.onclick = () => updateShop(shop.id, value, button);
+      actions.appendChild(button);
+    });
+
+    row.append(name, status, actions);
+    table.appendChild(row);
+  });
+
+  target.replaceChildren(table);
+}
+
+async function updateShop(id, status, button) {
+  if (!confirm("Change this shop's status to " + status + "?")) return;
+
+  button.disabled = true;
+
+  const { error } = await db
+    .from("shops")
+    .update({ status })
+    .eq("id", id);
+
+  button.disabled = false;
+
+  if (error) {
+    message.textContent = "Update failed: " + error.message;
+    return;
+  }
+
+  message.textContent = "Shop status updated to " + status + ".";
+  await loadDashboard();
+}
+
+function showProducts(products) {
+  const target = document.getElementById("products");
+
+  if (!products.length) {
+    target.textContent = "No products found.";
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.innerHTML = `
+    <tr>
+      <th>Product</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>Active</th>
+    </tr>
+  `;
+
+  products.forEach(product => {
+    const row = document.createElement("tr");
+
+    [
+      product.name,
+      product.category,
+      product.currency + " " + product.price,
+      product.is_active ? "Yes" : "No"
+    ].forEach(value => {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+
+    table.appendChild(row);
+  });
+
+  target.replaceChildren(table);
+}
+
+checkAdmin();
+</script>
 </body>
 </html>

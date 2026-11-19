@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutify Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: #f4f7f5;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .admin-container {
+      max-width: 1000px;
+      margin: 30px auto;
+    }
+    .admin-header {
+      background: #16834a;
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+    }
+    .admin-card {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px #00000010;
+    }
+    button {
+      background: #16834a;
+      color: white;
+      border: 0;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .status {
+      color: #16834a;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-container">
+  <div class="admin-header">
+    <h1>Mutify Admin</h1>
+    <p>Marketplace management dashboard</p>
+  </div>
+
+  <div class="admin-card">
+    <h2>Seller Applications</h2>
+    <p>Manage shops waiting for approval.</p>
+    <div id="applications">Loading applications...</div>
+  </div>
+
+  <div class="admin-card">
+    <h2>Marketplace Products</h2>
+    <p>View products listed by sellers.</p>
+    <div id="products">Loading products...</div>
+  </div>
+</div>
+
+</body>
+</html>
